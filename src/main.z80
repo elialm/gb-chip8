@@ -1,11 +1,15 @@
 include "hardware.inc"
 
+section "Chip8 Rom",rom0,align[$02]
+chip8_rom::
+incbin "roms/test_opcode.ch8"
+
 section "Initialisation",rom0[$0150]
 
 ; Initialisation
 __main::
     di                  ; Disable interrupts
-    ld sp, $FFFE        ; Initialise stack pointer
+    ld sp, stack_top    ; Initialise stack pointer
 
 	; Add code here
 
