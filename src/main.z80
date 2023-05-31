@@ -37,7 +37,7 @@ op_run:
 .subdispatcher_ret:
     ret
 
-section "Dispatcher table", rom0, align[$08]
+section "Dispatcher table", rom0
 subdispatcher_table:
     jp inst_0xxx_dispatcher
     jp inst_1xxx_dispatcher
