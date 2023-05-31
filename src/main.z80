@@ -42,7 +42,7 @@ op_run:
     ld d, a
 
     ; Add this offset thrice to dispatcher table start
-    ld hl, subdispatcher_table
+    ld hl, .subdispatcher_table
     add hl, de
     add hl, de
     add hl, de
@@ -50,11 +50,7 @@ op_run:
     ; Jump to selected subdispatcher
     jp hl
 
-.subdispatcher_ret:
-    ret
-
-section "Dispatcher table", rom0
-subdispatcher_table:
+.subdispatcher_table:
     jp inst_0xxx_dispatcher
     jp inst_1xxx_dispatcher
     jp inst_2xxx_dispatcher
@@ -71,6 +67,12 @@ subdispatcher_table:
     jp inst_Dxxx_dispatcher
     jp inst_Exxx_dispatcher
     jp inst_Fxxx_dispatcher
+
+.subdispatcher_ret:
+    ret
+
+section "Dispatcher table", rom0
+
 
 ; 0x0--- dispatcher
 ;   0x00E0: CLS
@@ -147,6 +149,103 @@ inst_7xxx_dispatcher:
 ;   0x8xy7: SUBN Vx, Vy
 ;   0x8xyE: SHL Vx {, Vy}
 inst_8xxx_dispatcher:
+
+    ; Get lowest nibble for subdispatcher
+    ld a, $0F
+    and a, c
+    
+    ; Load subdispatcher number as 16-bit offset
+    ld e, a
+    xor a, a
+    ld d, a
+
+    ; Add this offset thrice to dispatcher table start
+    ld hl, .subdispatcher_table
+    add hl, de
+    add hl, de
+    add hl, de
+
+    ; Extract src and dest registers
+    xor a, a
+    ld b, a
+    ld d, a
+    ld a, $0F
+    and a, b
+    ld c, a
+    ld a, $F0
+    and a, c
+    swap a
+    ld e, a
+
+    ; Jump to selected subdispatcher
+    jp hl
+
+    ; The following will hold true at dispatcher entry
+    ;   hl = dispatcher address
+    ;   bc = $000x
+    ;   de = $000y
+
+.subdispatcher_table:
+    jp inst_8xx0_dispatcher
+    jp inst_8xx1_dispatcher
+    jp inst_8xx2_dispatcher
+    jp inst_8xx3_dispatcher
+    jp inst_8xx4_dispatcher
+    jp inst_8xx5_dispatcher
+    jp inst_8xx6_dispatcher
+    jp inst_8xx7_dispatcher
+    jp inst_fault_handler
+    jp inst_fault_handler
+    jp inst_fault_handler
+    jp inst_fault_handler
+    jp inst_fault_handler
+    jp inst_fault_handler
+    jp inst_8xxE_dispatcher
+    jp inst_fault_handler
+
+; 0x8--0 dispatcher
+;   0x8xy0: LD Vx, Vy
+inst_8xx0_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0x8--1 dispatcher
+;   0x8xy1: OR Vx, Vy
+inst_8xx1_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0x8--2 dispatcher
+;   0x8xy2: AND Vx, Vy
+inst_8xx2_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0x8--3 dispatcher
+;   0x8xy3: XOR Vx, Vy
+inst_8xx3_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0x8--4 dispatcher
+;   0x8xy4: ADD Vx, Vy
+inst_8xx4_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0x8--5 dispatcher
+;   0x8xy5: SUB Vx, Vy
+inst_8xx5_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0x8--6 dispatcher
+;   0x8xy6: SHR Vx {, Vy}
+inst_8xx6_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0x8--7 dispatcher
+;   0x8xy7: SUBN Vx, Vy
+inst_8xx7_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0x8--E dispatcher
+;   0x8xyE: SHL Vx {, Vy}
+inst_8xxE_dispatcher:
     jp op_run.subdispatcher_ret
 
 ; 0x9--- dispatcher
@@ -221,6 +320,15 @@ c8_cpu_pc:
     ds 2
 ; Stack pointer
 c8_cpu_sp:
+    ds 1
+
+; Miscellaneous variables
+
+; Register number used for X in some operations
+c8_inst_x:
+    ds 1
+; Register number used for Y in some operations
+c8_inst_y:
     ds 1
 
 section "Chip8 stack"
