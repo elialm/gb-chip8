@@ -77,7 +77,28 @@ subdispatcher_table:
 ;   0x00EE: RET
 ;   0x0nnn: SYS addr
 inst_0xxx_dispatcher:
-    ; Instruction is ignored on modern emulators
+    ; Ignore instruction if second highest nibble is not 0
+    ; This would be the SYS instruction, but this is ignored in modern emulators
+    xor a, a
+    cp a, b
+    jp z, op_run.subdispatcher_ret
+
+    ; Check if CLS instruction
+    ld a, $E0
+    cp a, c
+    jr nz, .check_ret_inst
+
+    ; Perform CLS instruction
+    ; TODO - implement CLS
+
+.check_ret_inst:
+    ld a, $EE
+    cp a, c
+    jp nz, inst_fault_handler
+
+    ; Perform RET instruction
+    ; TODO - implement RET
+
     jp op_run.subdispatcher_ret
 
 ; 0x1--- dispatcher
@@ -172,6 +193,7 @@ inst_Exxx_dispatcher:
 inst_Fxxx_dispatcher:
     jp op_run.subdispatcher_ret
 
+inst_fault_handler:
 end:
     halt
 
