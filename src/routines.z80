@@ -1,0 +1,24 @@
+section "Routines", rom0
+
+; Memory copy - copies n bytes (8 bit) from src to dest, incrementing pointer
+;   n    - [d] registers (n != 0)
+;   src  - [bc] registers
+;   dest - [hl] registers
+memcpy::
+    ld a, [bc]          ; Load from src
+    ld [hl+], a         ; Copy to dest and increment pointer
+    inc bc              ; Increment src pointer
+    dec d               ; Decrement counter
+
+    jp nz, memcpy       ; Keep copying if != 0
+    ret
+
+; Memory set - sets n bytes (8 bit) at dest to x, incrementing pointer
+;   n       - 'd' register (n != 0)
+;   dest    - [hl] register
+;   x       - 'a' register
+memset::
+    ld [hl+], a
+    dec d
+    jp nz, memset
+    ret

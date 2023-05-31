@@ -11,7 +11,23 @@ __main::
     di                  ; Disable interrupts
     ld sp, stack_top    ; Initialise stack pointer
 
-	; Add code here
+; Initialise the emulator
+c8_init:
+    ; Zero all cpu variables
+    ld d, 25
+    ld hl, c8_cpu_reg_gp
+    xor a, a
+    call memset
+
+    ; Initialise program counter
+    ld a, $02
+    ld [c8_cpu_pc], a
+
+    ; ; Initialise stack pointer
+    ; ld a, low(c8_stack)
+    ; ld [c8_cpu_sp], a
+    ; ld a, high(c8_stack)
+    ; ld [c8_cpu_sp+1], a
 
 ; Opcode is in bc register
 op_run:
@@ -61,6 +77,7 @@ subdispatcher_table:
 ;   0x00EE: RET
 ;   0x0nnn: SYS addr
 inst_0xxx_dispatcher:
+    ; Instruction is ignored on modern emulators
     jp op_run.subdispatcher_ret
 
 ; 0x1--- dispatcher
@@ -160,18 +177,27 @@ end:
 
 section "Chip8 state", hram
 
+; CPU status
+
+; General purpose registers (16 x 8-bit)
 c8_cpu_reg_gp:
     ds 16
+; General purpose registers (1 x 16-bit)
 c8_cpu_reg_i:
     ds 2
+; CPU flag register
 c8_cpu_reg_vf:
     ds 1
+; Delay timer
 c8_cpu_dt:
     ds 1
+; Sound timer
 c8_cpu_st:
     ds 1
+; Program counter
 c8_cpu_pc:
     ds 2
+; Stack pointer
 c8_cpu_sp:
     ds 1
 
