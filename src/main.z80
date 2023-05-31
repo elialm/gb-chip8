@@ -1,10 +1,10 @@
 include "hardware.inc"
 
-section "Chip8 Rom",rom0,align[$02]
+section "Chip8 Rom", rom0, align[$02]
 chip8_rom::
 incbin "roms/test_opcode.ch8"
 
-section "Initialisation",rom0[$0150]
+section "Initialisation", rom0[$0150]
 
 ; Initialisation
 __main::
@@ -13,5 +13,169 @@ __main::
 
 	; Add code here
 
+; Opcode is in bc register
+op_run:
+    ; Get highest nibble for subdispatcher
+    ld a, b
+    swap a
+    and a, $0F
+    
+    ; Load subdispatcher number as 16-bit offset
+    ld e, a
+    xor a, a
+    ld d, a
+
+    ; Add this offset thrice to dispatcher table start
+    ld hl, subdispatcher_table
+    add hl, de
+    add hl, de
+    add hl, de
+
+    ; Jump to selected subdispatcher
+    jp hl
+
+.subdispatcher_ret:
+    ret
+
+section "Dispatcher table", rom0, align[$08]
+subdispatcher_table:
+    jp inst_0xxx_dispatcher
+    jp inst_1xxx_dispatcher
+    jp inst_2xxx_dispatcher
+    jp inst_3xxx_dispatcher
+    jp inst_4xxx_dispatcher
+    jp inst_5xxx_dispatcher
+    jp inst_6xxx_dispatcher
+    jp inst_7xxx_dispatcher
+    jp inst_8xxx_dispatcher
+    jp inst_9xxx_dispatcher
+    jp inst_Axxx_dispatcher
+    jp inst_Bxxx_dispatcher
+    jp inst_Cxxx_dispatcher
+    jp inst_Dxxx_dispatcher
+    jp inst_Exxx_dispatcher
+    jp inst_Fxxx_dispatcher
+
+; 0x0--- dispatcher
+;   0x00E0: CLS
+;   0x00EE: RET
+;   0x0nnn: SYS addr
+inst_0xxx_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0x1--- dispatcher
+;   0x1nnn: JP addr
+inst_1xxx_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0x2--- dispatcher
+;   0x2nnn: CALL addr
+inst_2xxx_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0x3--- dispatcher
+;   0x3xkk: SE Vx, byte
+inst_3xxx_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0x4--- dispatcher
+;   0x4xkk: SNE Vx, byte
+inst_4xxx_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0x5--- dispatcher
+;   0x5xy0: SE Vx, Vy
+inst_5xxx_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0x6--- dispatcher
+;   0x6xkk: LD Vx, byte
+inst_6xxx_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0x7--- dispatcher
+;   0x7xkk: ADD Vx, byte
+inst_7xxx_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0x8--- dispatcher
+;   0x8xy0: LD Vx, Vy
+;   0x8xy1: OR Vx, Vy
+;   0x8xy2: AND Vx, Vy
+;   0x8xy3: XOR Vx, Vy
+;   0x8xy4: ADD Vx, Vy
+;   0x8xy5: SUB Vx, Vy
+;   0x8xy6: SHR Vx {, Vy}
+;   0x8xy7: SUBN Vx, Vy
+;   0x8xyE: SHL Vx {, Vy}
+inst_8xxx_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0x9--- dispatcher
+;   0x9xy0: SNE Vx, Vy
+inst_9xxx_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0xA--- dispatcher
+;   0xAnnn: LD I, addr
+inst_Axxx_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0xB--- dispatcher
+;   0xBnnn: JP V0, addr
+inst_Bxxx_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0xC--- dispatcher
+;   0xCxkk: RND Vx, byte
+inst_Cxxx_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0xD--- dispatcher
+;   0xDxyn: DRW Vx, Vy, nibble
+inst_Dxxx_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0xE--- dispatcher
+;   0xEx9E: SKP Vx
+;   0xExA1: SKNP Vx
+inst_Exxx_dispatcher:
+    jp op_run.subdispatcher_ret
+
+; 0xF--- dispatcher
+;   Fx07: LD Vx, DT
+;   Fx0A: LD Vx, K
+;   Fx15: LD DT, Vx
+;   Fx18: LD ST, Vx
+;   Fx1E: ADD I, Vx
+;   Fx29: LD F, Vx
+;   Fx33: LD B, Vx
+;   Fx55: LD [I], Vx
+;   Fx65: LD Vx, [I]
+inst_Fxxx_dispatcher:
+    jp op_run.subdispatcher_ret
+
 end:
     halt
+
+section "Chip8 state", hram
+
+c8_cpu_reg_gp:
+    ds 16
+c8_cpu_reg_i:
+    ds 2
+c8_cpu_reg_vf:
+    ds 1
+c8_cpu_dt:
+    ds 1
+c8_cpu_st:
+    ds 1
+c8_cpu_pc:
+    ds 2
+c8_cpu_sp:
+    ds 1
+
+section "Chip8 stack"
+
+c8_stack:
+    ds 32
