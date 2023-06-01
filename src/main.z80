@@ -166,15 +166,16 @@ inst_8xxx_dispatcher:
     add hl, de
 
     ; Extract src and dest registers
-    xor a, a
-    ld b, a
-    ld d, a
+    ld b, $FF                   ; Chip8 registers sit in HRAM
+    ld d, b                     ; Chip8 registers sit in HRAM
     ld a, $0F
     and a, b
+    add a, low(c8_cpu_reg_gp)   ; Add registers base pointer
     ld c, a
     ld a, $F0
     and a, c
     swap a
+    add a, low(c8_cpu_reg_gp)   ; Add registers base pointer
     ld e, a
 
     ; Jump to selected subdispatcher
@@ -182,8 +183,8 @@ inst_8xxx_dispatcher:
 
     ; The following will hold true at dispatcher entry
     ;   hl = dispatcher address
-    ;   bc = $000x
-    ;   de = $000y
+    ;   bc = pointer to used register for x
+    ;   de = pointer to used register for y
 
 .subdispatcher_table:
     jp inst_8xx0_dispatcher
@@ -319,7 +320,7 @@ inst_Fxxx_dispatcher:
     ; The following will hold true at dispatcher entry
     ;   hl = dispatcher address
     ;   bc = $Fxyy, with yy being the selected opcode
-    ;   de = pointer to used register
+    ;   de = pointer to used register for x
 
     ; Jump to assoctiated sub-routine
     ld a, [hl+]
