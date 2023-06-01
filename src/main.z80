@@ -68,12 +68,6 @@ op_run:
     jp inst_Exxx_dispatcher
     jp inst_Fxxx_dispatcher
 
-.subdispatcher_ret:
-    ret
-
-section "Dispatcher table", rom0
-
-
 ; 0x0--- dispatcher
 ;   0x00E0: CLS
 ;   0x00EE: RET
@@ -83,7 +77,7 @@ inst_0xxx_dispatcher:
     ; This would be the SYS instruction, but this is ignored in modern emulators
     xor a, a
     cp a, b
-    jp z, op_run.subdispatcher_ret
+    ret
 
     ; Check if CLS instruction
     ld a, $E0
@@ -101,42 +95,42 @@ inst_0xxx_dispatcher:
     ; Perform RET instruction
     ; TODO - implement RET
 
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0x1--- dispatcher
 ;   0x1nnn: JP addr
 inst_1xxx_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0x2--- dispatcher
 ;   0x2nnn: CALL addr
 inst_2xxx_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0x3--- dispatcher
 ;   0x3xkk: SE Vx, byte
 inst_3xxx_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0x4--- dispatcher
 ;   0x4xkk: SNE Vx, byte
 inst_4xxx_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0x5--- dispatcher
 ;   0x5xy0: SE Vx, Vy
 inst_5xxx_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0x6--- dispatcher
 ;   0x6xkk: LD Vx, byte
 inst_6xxx_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0x7--- dispatcher
 ;   0x7xkk: ADD Vx, byte
 inst_7xxx_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0x8--- dispatcher
 ;   0x8xy0: LD Vx, Vy
@@ -207,78 +201,78 @@ inst_8xxx_dispatcher:
 ; 0x8--0 dispatcher
 ;   0x8xy0: LD Vx, Vy
 inst_8xx0_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0x8--1 dispatcher
 ;   0x8xy1: OR Vx, Vy
 inst_8xx1_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0x8--2 dispatcher
 ;   0x8xy2: AND Vx, Vy
 inst_8xx2_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0x8--3 dispatcher
 ;   0x8xy3: XOR Vx, Vy
 inst_8xx3_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0x8--4 dispatcher
 ;   0x8xy4: ADD Vx, Vy
 inst_8xx4_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0x8--5 dispatcher
 ;   0x8xy5: SUB Vx, Vy
 inst_8xx5_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0x8--6 dispatcher
 ;   0x8xy6: SHR Vx {, Vy}
 inst_8xx6_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0x8--7 dispatcher
 ;   0x8xy7: SUBN Vx, Vy
 inst_8xx7_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0x8--E dispatcher
 ;   0x8xyE: SHL Vx {, Vy}
 inst_8xxE_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0x9--- dispatcher
 ;   0x9xy0: SNE Vx, Vy
 inst_9xxx_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0xA--- dispatcher
 ;   0xAnnn: LD I, addr
 inst_Axxx_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0xB--- dispatcher
 ;   0xBnnn: JP V0, addr
 inst_Bxxx_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0xC--- dispatcher
 ;   0xCxkk: RND Vx, byte
 inst_Cxxx_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0xD--- dispatcher
 ;   0xDxyn: DRW Vx, Vy, nibble
 inst_Dxxx_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0xE--- dispatcher
 ;   0xEx9E: SKP Vx
 ;   0xExA1: SKNP Vx
 inst_Exxx_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0xF--- dispatcher
 ;   Fx07: LD Vx, DT
@@ -356,47 +350,47 @@ inst_Fxxx_dispatcher:
 ; 0xF-33 dispatcher
 ;   Fx33: LD B, Vx
 inst_Fx33_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0xF-15 dispatcher
 ;   Fx15: LD DT, Vx
 inst_Fx15_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0xF-55 dispatcher
 ;   Fx55: LD [I], Vx
 inst_Fx55_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
 ; 0xF-65 dispatcher
 ;   Fx65: LD Vx, [I]
 inst_Fx65_dispatcher:
-    jp op_run.subdispatcher_ret
+    ret
 
-; 0xF--7 dispatcher
+; 0xF-07 dispatcher
 ;   Fx07: LD Vx, DT
-inst_Fxx7_dispatcher:
-    jp op_run.subdispatcher_ret
+inst_Fx07_dispatcher:
+    ret
 
-; 0xF--8 dispatcher
+; 0xF-18 dispatcher
 ;   Fx18: LD ST, Vx
-inst_Fxx8_dispatcher:
-    jp op_run.subdispatcher_ret
+inst_Fx18_dispatcher:
+    ret
 
-; 0xF--9 dispatcher
+; 0xF-29 dispatcher
 ;   Fx29: LD F, Vx
-inst_Fxx9_dispatcher:
-    jp op_run.subdispatcher_ret
+inst_Fx29_dispatcher:
+    ret
 
-; 0xF--A dispatcher
+; 0xF-0A dispatcher
 ;   Fx0A: LD Vx, K
-inst_FxxA_dispatcher:
-    jp op_run.subdispatcher_ret
+inst_Fx0A_dispatcher:
+    ret
 
-; 0xF--E dispatcher
+; 0xF-1E dispatcher
 ;   Fx1E: ADD I, Vx
-inst_FxxE_dispatcher:
-    jp op_run.subdispatcher_ret
+inst_Fx1E_dispatcher:
+    ret
 
 inst_fault_handler:
 end:
