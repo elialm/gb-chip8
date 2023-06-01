@@ -47,6 +47,16 @@ op_run:
     add hl, de
     add hl, de
 
+    ; Most opcodes have some format 0x-x--, where x is a register used for the operation
+    ; Here, the opcode is assumed to have a register specified there
+    ; Then, opcodes that use it won't have to extract it themselves
+    ; For opcodes that don't have an x register at this location, this value can be ignored
+    ld d, $FF                   ; Chip8 registers sit in HRAM
+    ld a, b
+    and a, $0F
+    add a, low(c8_cpu_reg_gp)   ; Add registers base pointer
+    ld e, a
+
     ; Jump to selected subdispatcher
     jp hl
 
@@ -119,18 +129,13 @@ inst_8xxx_dispatcher:
     add hl, de
     add hl, de
 
-    ; Extract src and dest registers
+    ; Extract dest register
     ld b, $FF                   ; Chip8 registers sit in HRAM
-    ld d, b                     ; Chip8 registers sit in HRAM
-    ld a, $0F
-    and a, b
-    add a, low(c8_cpu_reg_gp)   ; Add registers base pointer
-    ld c, a
     ld a, $F0
     and a, c
     swap a
     add a, low(c8_cpu_reg_gp)   ; Add registers base pointer
-    ld e, a
+    ld c, a
 
     ; Jump to selected subdispatcher
     jp hl

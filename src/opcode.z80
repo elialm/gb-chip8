@@ -1,5 +1,8 @@
 section "Chip8 instruction implementation", rom0
 
+; Note: for instructions that have an x register will have its
+;       pointer kept in the Gameboy's de register.
+
 ; 0x00E0 dispatcher
 ;   0x00E0: CLS
 inst_00E0_dispatcher::
@@ -47,8 +50,8 @@ inst_7xxx_dispatcher::
 
 ; The following will hold true at 0x8--- dispatcher entry
 ;   hl = dispatcher address
-;   bc = pointer to used register for x
-;   de = pointer to used register for y
+;   bc = pointer to used register for y
+;   de = pointer to used register for x
 
 ; 0x8--0 dispatcher
 ;   0x8xy0: LD Vx, Vy
@@ -128,7 +131,7 @@ inst_Exxx_dispatcher::
 
 ; The following will hold true at 0xF--- dispatcher entry
 ;   hl = dispatcher address
-;   bc = $Fxyy, with yy being the selected opcode
+;   bc = running opcode
 ;   de = pointer to used register for x
 
 ; 0xF-33 dispatcher
