@@ -1,6 +1,6 @@
 include "hardware.inc"
 
-section "Chip8 Rom", romx, bank[$01], align[$0C]
+section "Chip8 Rom", romx, bank[$01], align[$0C, $200]
 c8_rom::
 incbin "roms/test_opcode.ch8"
 
@@ -21,7 +21,7 @@ c8_init:
 
     ; Initialise program counter
     ; Low byte is already $00
-    ld a, high(c8_rom) + $02    ; Chip8 programs usually start at $200
+    ld a, high(c8_rom)      ; Chip8 programs usually start at $200
     ldh [c8_cpu_pc+1], a
 
     ; Initialise stack pointer
@@ -146,25 +146,30 @@ inst_0xxx_dispatcher:
 ;   $8xyE: SHL Vx {, Vy}
 inst_8xxx_dispatcher:
 
+    ; Keep copy of lower op byte for later extraction of y
+    ld h, c
+
     ; Get lowest nibble for subdispatcher
     ld a, $0F
     and a, c
     
     ; Load subdispatcher number as 16-bit offset
-    ld e, a
+    ld c, a
     xor a, a
-    ld d, a
+    ld b, a
+
+    ; Lower op byte copy is now kept in a
+    ld a, h
 
     ; Add this offset thrice to dispatcher table start
     ld hl, .subdispatcher_table
-    add hl, de
-    add hl, de
-    add hl, de
+    add hl, bc
+    add hl, bc
+    add hl, bc
 
     ; Extract dest register
     ld b, $FF                   ; Chip8 registers sit in HRAM
-    ld a, $F0
-    and a, c
+    and a, $F0                  ; Register already contains lower op code byte
     swap a
     add a, low(c8_cpu_reg_gp)   ; Add registers base pointer
     ld c, a
