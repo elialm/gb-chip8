@@ -155,46 +155,129 @@ inst_7xxx_dispatcher::
 ; $8--0 dispatcher
 ;   $8xy0: LD Vx, Vy
 inst_8xx0_dispatcher::
+    ; Copy Vy to Vx
+    ld a, [bc]
+    ld [de], a
+
     ret
 
 ; $8--1 dispatcher
 ;   $8xy1: OR Vx, Vy
 inst_8xx1_dispatcher::
+    ; Calculate Vx | Vy and put value in Vx
+    ld a, [de]
+    ld h, a
+    ld a, [bc]
+    or a, h
+    ld [de], a
+
     ret
 
 ; $8--2 dispatcher
 ;   $8xy2: AND Vx, Vy
 inst_8xx2_dispatcher::
+    ; Calculate Vx & Vy and put value in Vx
+    ld a, [de]
+    ld h, a
+    ld a, [bc]
+    and a, h
+    ld [de], a
+
     ret
 
 ; $8--3 dispatcher
 ;   $8xy3: XOR Vx, Vy
 inst_8xx3_dispatcher::
+    ; Calculate Vx ^ Vy and put value in Vx
+    ld a, [de]
+    ld h, a
+    ld a, [bc]
+    xor a, h
+    ld [de], a
+
     ret
 
 ; $8--4 dispatcher
 ;   $8xy4: ADD Vx, Vy
 inst_8xx4_dispatcher::
+    ; Calculate Vx + Vy and put value in Vx
+    ld a, [de]
+    ld h, a
+    ld a, [bc]
+    add a, h
+    ld [de], a
+
+    ; Set VF register
+    rla         ; Bit 0 is now the carry
+    and a, $01
+    ldh [c8_cpu_reg_vf], a
+
     ret
 
 ; $8--5 dispatcher
 ;   $8xy5: SUB Vx, Vy
 inst_8xx5_dispatcher::
+    ; Calculate Vx - Vy and put value in Vx
+    ld a, [bc]
+    ld h, a
+    ld a, [de]
+    sub a, h
+    ld [de], a
+
+    ; Set VF register
+    ccf
+    rla         ; Bit 0 is now the inverted carry
+    and a, $01
+    ldh [c8_cpu_reg_vf], a
+
     ret
 
 ; $8--6 dispatcher
 ;   $8xy6: SHR Vx {, Vy}
 inst_8xx6_dispatcher::
+    ; Calculate Vx >> 1 and put value in Vx
+    ld a, [de]
+    srl a
+    ld [de], a
+
+    ; Set VF register
+    rla         ; Bit 0 is now the carry
+    and a, $01
+    ldh [c8_cpu_reg_vf], a
+
     ret
 
 ; $8--7 dispatcher
 ;   $8xy7: SUBN Vx, Vy
 inst_8xx7_dispatcher::
+    ; Calculate Vy - Vx and put value in Vx
+    ld a, [de]
+    ld h, a
+    ld a, [bc]
+    sub a, h
+    ld [de], a
+
+    ; Set VF register
+    ccf
+    rla         ; Bit 0 is now the inverted carry
+    and a, $01
+    ldh [c8_cpu_reg_vf], a
+
     ret
 
 ; $8--E dispatcher
 ;   $8xyE: SHL Vx {, Vy}
 inst_8xxE_dispatcher::
+    ; Calculate Vx >> 1 and put value in Vx
+    ld a, [de]
+    sla a
+    ld [de], a
+
+    ; Set VF register
+    rla         ; Bit 0 is now the carry
+    and a, $01
+    ldh [c8_cpu_reg_vf], a
+
     ret
 
 ; $9--- dispatcher
