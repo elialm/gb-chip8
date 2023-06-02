@@ -283,7 +283,23 @@ inst_8xxE_dispatcher::
 ; $9--- dispatcher
 ;   $9xy0: SNE Vx, Vy
 inst_9xxx_dispatcher::
-    ret
+    ; Assert opcode lower byte is $-0
+    ld a, $0F
+    and a, c
+    jp nz, inst_fault_handler
+
+    ; Calculate Vy pointer
+    ld h, $FF           ; Chip8 registers sit in HRAM
+    ld l, c
+    swap l
+
+    ; Load and compare Vx and Vy
+    ld a, [de]
+    cp a, [hl]
+    ret nz
+
+    ; Skip next instruction
+    jp inst_skip_next
 
 ; $A--- dispatcher
 ;   $Annn: LD I, addr
