@@ -16,6 +16,22 @@ inst_00E0_dispatcher::
 ; $00EE dispatcher
 ;   $00EE: RET
 inst_00EE_dispatcher::
+    ; Load stack pointer
+    ld h, high(c8_stack)
+    ldh a, [c8_cpu_sp]
+    ld l, a
+
+    ; Set program counter
+    dec l
+    ld a, [hl-]
+    ldh [c8_cpu_pc+1], a
+    ld a, [hl]
+    ldh [c8_cpu_pc], a
+
+    ; Update stack pointer
+    ld a, l
+    ldh [c8_cpu_sp], a
+
     ret
 
 ; $1--- dispatcher
