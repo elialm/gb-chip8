@@ -134,12 +134,17 @@ inst_6xxx_dispatcher::
     ; Copy kk into Vx
     ld a, c
     ld [de], a
-    
+
     ret
 
 ; $7--- dispatcher
 ;   $7xkk: ADD Vx, byte
 inst_7xxx_dispatcher::
+    ; Add kk to Vx
+    ld a, [de]
+    add a, c
+    ld [de], a
+
     ret
 
 ; The following will hold true at $8--- dispatcher entry
