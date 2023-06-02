@@ -131,6 +131,10 @@ inst_skip_next:
 ; $6--- dispatcher
 ;   $6xkk: LD Vx, byte
 inst_6xxx_dispatcher::
+    ; Copy kk into Vx
+    ld a, c
+    ld [de], a
+    
     ret
 
 ; $7--- dispatcher
