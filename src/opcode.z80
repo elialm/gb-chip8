@@ -21,7 +21,7 @@ inst_00EE_dispatcher::
 ; $1--- dispatcher
 ;   $1nnn: JP addr
 inst_1xxx_dispatcher::
-    ; Calculate high byte
+    ; Calculate high address byte
     ld a, b
     and a, $0F
     or a, high(c8_rom) & $F0
@@ -30,13 +30,30 @@ inst_1xxx_dispatcher::
     ldh [c8_cpu_pc+1], a
     ld a, c
     ldh [c8_cpu_pc], a
-    
+
     ret
 
 ; $2--- dispatcher
 ;   $2nnn: CALL addr
 inst_2xxx_dispatcher::
-    ret
+    ; Load stack pointer
+    ld h, high(c8_stack)
+    ldh a, [c8_cpu_sp]
+    ld l, a
+
+    ; Load current program counter to top of stack
+    ; The program counter is already incremented to point to the next instruction
+    ldh a, [c8_cpu_pc]
+    ld [hl+], a
+    ldh a, [c8_cpu_pc+1]
+    ld [hl+], a
+
+    ; Update stack pointer
+    ld a, l
+    ldh [c8_cpu_sp], a
+
+    ; The rest is same as the $1nnn routine, so just jump to that
+    jr inst_1xxx_dispatcher
 
 ; $3--- dispatcher
 ;   $3xkk: SE Vx, byte

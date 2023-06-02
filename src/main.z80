@@ -273,8 +273,7 @@ inst_Fxxx_dispatcher:
     dw inst_Fx65_dispatcher
     db $00
 
-inst_fault_handler:
-end:
+inst_fault_handler::
     halt
 
 section "Chip8 state", hram
@@ -282,28 +281,29 @@ section "Chip8 state", hram
 ; CPU status
 
 ; General purpose registers (16 x 8-bit)
-c8_cpu_reg_gp:
+c8_cpu_reg_gp::
     ds 16
 ; General purpose registers (1 x 16-bit)
-c8_cpu_reg_i:
+c8_cpu_reg_i::
     ds 2
 ; CPU flag register
-c8_cpu_reg_vf:
+c8_cpu_reg_vf::
     ds 1
 ; Delay timer
-c8_cpu_dt:
+c8_cpu_dt::
     ds 1
 ; Sound timer
-c8_cpu_st:
+c8_cpu_st::
     ds 1
 ; Program counter
-c8_cpu_pc:
+c8_cpu_pc::
     ds 2
 ; Stack pointer
-c8_cpu_sp:
+c8_cpu_sp::
     ds 1
 
 section "Chip8 stack", wram0, align[$08]
 
-c8_stack:
+; Chip8 stack
+c8_stack::
     ds 32
