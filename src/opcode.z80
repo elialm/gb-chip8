@@ -321,10 +321,14 @@ inst_Cxxx_dispatcher::
 inst_Dxxx_dispatcher::
     ret
 
-; $E--- dispatcher
+; $E-9E dispatcher
 ;   $Ex9E: SKP Vx
+inst_Ex9E_dispatcher::
+    ret
+
+; $E-A1 dispatcher
 ;   $ExA1: SKNP Vx
-inst_Exxx_dispatcher::
+inst_ExA1_dispatcher::
     ret
 
 ; The following will hold true at $F--- dispatcher entry

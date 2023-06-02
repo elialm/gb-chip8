@@ -196,6 +196,23 @@ inst_8xxx_dispatcher:
     jp inst_8xxE_dispatcher
     jp inst_fault_handler
 
+; $E--- dispatcher
+;   $Ex9E: SKP Vx
+;   $ExA1: SKNP Vx
+inst_Exxx_dispatcher:
+    ; Check if SKP instruction
+    ld a, $9E
+    cp a, c
+    jp z, inst_Ex9E_dispatcher
+
+    ; Check if SKNP instruction
+    ld a, $A1
+    cp a, c
+    jp z, inst_ExA1_dispatcher
+
+    ; If code got here, unknown opcode
+    jp inst_fault_handler
+
 ; $F--- dispatcher
 ;   $Fx07: LD Vx, DT
 ;   $Fx0A: LD Vx, K
@@ -207,15 +224,6 @@ inst_8xxx_dispatcher:
 ;   $Fx55: LD [I], Vx
 ;   $Fx65: LD Vx, [I]
 inst_Fxxx_dispatcher:
-
-    ; Extract register number
-    ld a, b
-    and a, $0F
-
-    ; Set register pointer
-    ld d, $FF                   ; Chip8 registers sit in HRAM
-    add a, low(c8_cpu_reg_gp)   ; Add registers base pointer
-    ld e, a
 
     ; Initialise code pointer
     ld hl, .dispatcher_codes - 2
