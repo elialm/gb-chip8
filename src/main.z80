@@ -1,7 +1,7 @@
 include "hardware.inc"
 
-section "Chip8 Rom", rom0, align[$02]
-chip8_rom::
+section "Chip8 Rom", romx, bank[$01], align[$0C]
+c8_rom::
 incbin "roms/test_opcode.ch8"
 
 section "Initialisation", rom0[$0150]
@@ -20,17 +20,49 @@ c8_init:
     call memset
 
     ; Initialise program counter
-    ld a, $02
-    ld [c8_cpu_pc], a
+    ; Low byte is already $00
+    ld a, high(c8_rom) + $02    ; Chip8 programs usually start at 0x200
+    ldh [c8_cpu_pc+1], a
 
-    ; ; Initialise stack pointer
-    ; ld a, low(c8_stack)
-    ; ld [c8_cpu_sp], a
-    ; ld a, high(c8_stack)
-    ; ld [c8_cpu_sp+1], a
+    ; Initialise stack pointer
+    ; Low byte is already $00
+    ld a, high(c8_stack)
+    ldh [c8_cpu_sp+1], a
+
+    ; Loop Chip cycles
+.loop_cycle:
+    call c8_cycle
+    jr .loop_cycle
+
+; Run a Chip8 cycle
+; This includes:
+;   - Running the next opcode
+c8_cycle:
+    ; Load program counter
+    ldh a, [c8_cpu_pc]
+    ld l, a
+    ldh a, [c8_cpu_pc+1]
+    ld h, a
+
+    ; Load instruction (Chip8 is big-endian)
+    ld b, [hl]
+    inc hl
+    ld c, [hl]
+    inc hl
+
+    ; Store new program counter
+    ld a, h
+    ldh [c8_cpu_pc+1], a
+    ld a, l
+    ldh [c8_cpu_pc], a
+
+    ; Decode and run opcode
+    call c8_op_decode_n_execute
+
+    ret
 
 ; Opcode is in bc register
-op_run:
+c8_op_decode_n_execute:
     ; Get highest nibble for subdispatcher
     ld a, b
     swap a
@@ -266,16 +298,7 @@ c8_cpu_pc:
 c8_cpu_sp:
     ds 1
 
-; Miscellaneous variables
-
-; Register number used for X in some operations
-c8_inst_x:
-    ds 1
-; Register number used for Y in some operations
-c8_inst_y:
-    ds 1
-
-section "Chip8 stack", wram0
+section "Chip8 stack", wram0, align[$08]
 
 c8_stack:
     ds 32
