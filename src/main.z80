@@ -21,7 +21,7 @@ c8_init:
 
     ; Initialise program counter
     ; Low byte is already $00
-    ld a, high(c8_rom) + $02    ; Chip8 programs usually start at 0x200
+    ld a, high(c8_rom) + $02    ; Chip8 programs usually start at $200
     ldh [c8_cpu_pc+1], a
 
     ; Initialise stack pointer
@@ -79,7 +79,7 @@ c8_op_decode_n_execute:
     add hl, de
     add hl, de
 
-    ; Most opcodes have some format 0x-x--, where x is a register used for the operation
+    ; Most opcodes have some format $-x--, where x is a register used for the operation
     ; Here, the opcode is assumed to have a register specified there
     ; Then, opcodes that use it won't have to extract it themselves
     ; For opcodes that don't have an x register at this location, this value can be ignored
@@ -110,10 +110,10 @@ c8_op_decode_n_execute:
     jp inst_Exxx_dispatcher
     jp inst_Fxxx_dispatcher
 
-; 0x0--- dispatcher
-;   0x00E0: CLS
-;   0x00EE: RET
-;   0x0nnn: SYS addr
+; $0--- dispatcher
+;   $00E0: CLS
+;   $00EE: RET
+;   $0nnn: SYS addr
 inst_0xxx_dispatcher:
     ; Ignore instruction if second highest nibble is not 0
     ; This would be the SYS instruction, but this is ignored in modern emulators
@@ -134,16 +134,16 @@ inst_0xxx_dispatcher:
     ; If code got here, unknown opcode
     jp inst_fault_handler
 
-; 0x8--- dispatcher
-;   0x8xy0: LD Vx, Vy
-;   0x8xy1: OR Vx, Vy
-;   0x8xy2: AND Vx, Vy
-;   0x8xy3: XOR Vx, Vy
-;   0x8xy4: ADD Vx, Vy
-;   0x8xy5: SUB Vx, Vy
-;   0x8xy6: SHR Vx {, Vy}
-;   0x8xy7: SUBN Vx, Vy
-;   0x8xyE: SHL Vx {, Vy}
+; $8--- dispatcher
+;   $8xy0: LD Vx, Vy
+;   $8xy1: OR Vx, Vy
+;   $8xy2: AND Vx, Vy
+;   $8xy3: XOR Vx, Vy
+;   $8xy4: ADD Vx, Vy
+;   $8xy5: SUB Vx, Vy
+;   $8xy6: SHR Vx {, Vy}
+;   $8xy7: SUBN Vx, Vy
+;   $8xyE: SHL Vx {, Vy}
 inst_8xxx_dispatcher:
 
     ; Get lowest nibble for subdispatcher
@@ -195,16 +195,16 @@ inst_8xxx_dispatcher:
     jp inst_8xxE_dispatcher
     jp inst_fault_handler
 
-; 0xF--- dispatcher
-;   Fx07: LD Vx, DT
-;   Fx0A: LD Vx, K
-;   Fx15: LD DT, Vx
-;   Fx18: LD ST, Vx
-;   Fx1E: ADD I, Vx
-;   Fx29: LD F, Vx
-;   Fx33: LD B, Vx
-;   Fx55: LD [I], Vx
-;   Fx65: LD Vx, [I]
+; $F--- dispatcher
+;   $Fx07: LD Vx, DT
+;   $Fx0A: LD Vx, K
+;   $Fx15: LD DT, Vx
+;   $Fx18: LD ST, Vx
+;   $Fx1E: ADD I, Vx
+;   $Fx29: LD F, Vx
+;   $Fx33: LD B, Vx
+;   $Fx55: LD [I], Vx
+;   $Fx65: LD Vx, [I]
 inst_Fxxx_dispatcher:
 
     ; Extract register number

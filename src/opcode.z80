@@ -1,180 +1,182 @@
 section "Chip8 instruction implementation", rom0
 
 ; Note: for instructions that have an x register will have its
-;       pointer kept in the Gameboy's de register.
+;       pointer kept in the Gameboy's de register. This is only
+;       true when the x register is specified at $-x-- or if
+;       explicitly stated.
 
-; 0x00E0 dispatcher
-;   0x00E0: CLS
+; $00E0 dispatcher
+;   $00E0: CLS
 inst_00E0_dispatcher::
     ret
 
-; 0x00EE dispatcher
-;   0x00EE: RET
+; $00EE dispatcher
+;   $00EE: RET
 inst_00EE_dispatcher::
     ret
 
-; 0x1--- dispatcher
-;   0x1nnn: JP addr
+; $1--- dispatcher
+;   $1nnn: JP addr
 inst_1xxx_dispatcher::
     ret
 
-; 0x2--- dispatcher
-;   0x2nnn: CALL addr
+; $2--- dispatcher
+;   $2nnn: CALL addr
 inst_2xxx_dispatcher::
     ret
 
-; 0x3--- dispatcher
-;   0x3xkk: SE Vx, byte
+; $3--- dispatcher
+;   $3xkk: SE Vx, byte
 inst_3xxx_dispatcher::
     ret
 
-; 0x4--- dispatcher
-;   0x4xkk: SNE Vx, byte
+; $4--- dispatcher
+;   $4xkk: SNE Vx, byte
 inst_4xxx_dispatcher::
     ret
 
-; 0x5--- dispatcher
-;   0x5xy0: SE Vx, Vy
+; $5--- dispatcher
+;   $5xy0: SE Vx, Vy
 inst_5xxx_dispatcher::
     ret
 
-; 0x6--- dispatcher
-;   0x6xkk: LD Vx, byte
+; $6--- dispatcher
+;   $6xkk: LD Vx, byte
 inst_6xxx_dispatcher::
     ret
 
-; 0x7--- dispatcher
-;   0x7xkk: ADD Vx, byte
+; $7--- dispatcher
+;   $7xkk: ADD Vx, byte
 inst_7xxx_dispatcher::
     ret
 
-; The following will hold true at 0x8--- dispatcher entry
+; The following will hold true at $8--- dispatcher entry
 ;   hl = dispatcher address
 ;   bc = pointer to used register for y
 ;   de = pointer to used register for x
 
-; 0x8--0 dispatcher
-;   0x8xy0: LD Vx, Vy
+; $8--0 dispatcher
+;   $8xy0: LD Vx, Vy
 inst_8xx0_dispatcher::
     ret
 
-; 0x8--1 dispatcher
-;   0x8xy1: OR Vx, Vy
+; $8--1 dispatcher
+;   $8xy1: OR Vx, Vy
 inst_8xx1_dispatcher::
     ret
 
-; 0x8--2 dispatcher
-;   0x8xy2: AND Vx, Vy
+; $8--2 dispatcher
+;   $8xy2: AND Vx, Vy
 inst_8xx2_dispatcher::
     ret
 
-; 0x8--3 dispatcher
-;   0x8xy3: XOR Vx, Vy
+; $8--3 dispatcher
+;   $8xy3: XOR Vx, Vy
 inst_8xx3_dispatcher::
     ret
 
-; 0x8--4 dispatcher
-;   0x8xy4: ADD Vx, Vy
+; $8--4 dispatcher
+;   $8xy4: ADD Vx, Vy
 inst_8xx4_dispatcher::
     ret
 
-; 0x8--5 dispatcher
-;   0x8xy5: SUB Vx, Vy
+; $8--5 dispatcher
+;   $8xy5: SUB Vx, Vy
 inst_8xx5_dispatcher::
     ret
 
-; 0x8--6 dispatcher
-;   0x8xy6: SHR Vx {, Vy}
+; $8--6 dispatcher
+;   $8xy6: SHR Vx {, Vy}
 inst_8xx6_dispatcher::
     ret
 
-; 0x8--7 dispatcher
-;   0x8xy7: SUBN Vx, Vy
+; $8--7 dispatcher
+;   $8xy7: SUBN Vx, Vy
 inst_8xx7_dispatcher::
     ret
 
-; 0x8--E dispatcher
-;   0x8xyE: SHL Vx {, Vy}
+; $8--E dispatcher
+;   $8xyE: SHL Vx {, Vy}
 inst_8xxE_dispatcher::
     ret
 
-; 0x9--- dispatcher
-;   0x9xy0: SNE Vx, Vy
+; $9--- dispatcher
+;   $9xy0: SNE Vx, Vy
 inst_9xxx_dispatcher::
     ret
 
-; 0xA--- dispatcher
-;   0xAnnn: LD I, addr
+; $A--- dispatcher
+;   $Annn: LD I, addr
 inst_Axxx_dispatcher::
     ret
 
-; 0xB--- dispatcher
-;   0xBnnn: JP V0, addr
+; $B--- dispatcher
+;   $Bnnn: JP V0, addr
 inst_Bxxx_dispatcher::
     ret
 
-; 0xC--- dispatcher
-;   0xCxkk: RND Vx, byte
+; $C--- dispatcher
+;   $Cxkk: RND Vx, byte
 inst_Cxxx_dispatcher::
     ret
 
-; 0xD--- dispatcher
-;   0xDxyn: DRW Vx, Vy, nibble
+; $D--- dispatcher
+;   $Dxyn: DRW Vx, Vy, nibble
 inst_Dxxx_dispatcher::
     ret
 
-; 0xE--- dispatcher
-;   0xEx9E: SKP Vx
-;   0xExA1: SKNP Vx
+; $E--- dispatcher
+;   $Ex9E: SKP Vx
+;   $ExA1: SKNP Vx
 inst_Exxx_dispatcher::
     ret
 
-; The following will hold true at 0xF--- dispatcher entry
+; The following will hold true at $F--- dispatcher entry
 ;   hl = dispatcher address
 ;   bc = running opcode
 ;   de = pointer to used register for x
 
-; 0xF-33 dispatcher
+; $F-33 dispatcher
 ;   Fx33: LD B, Vx
 inst_Fx33_dispatcher::
     ret
 
-; 0xF-15 dispatcher
+; $F-15 dispatcher
 ;   Fx15: LD DT, Vx
 inst_Fx15_dispatcher::
     ret
 
-; 0xF-55 dispatcher
+; $F-55 dispatcher
 ;   Fx55: LD [I], Vx
 inst_Fx55_dispatcher::
     ret
 
-; 0xF-65 dispatcher
+; $F-65 dispatcher
 ;   Fx65: LD Vx, [I]
 inst_Fx65_dispatcher::
     ret
 
-; 0xF-07 dispatcher
+; $F-07 dispatcher
 ;   Fx07: LD Vx, DT
 inst_Fx07_dispatcher::
     ret
 
-; 0xF-18 dispatcher
+; $F-18 dispatcher
 ;   Fx18: LD ST, Vx
 inst_Fx18_dispatcher::
     ret
 
-; 0xF-29 dispatcher
+; $F-29 dispatcher
 ;   Fx29: LD F, Vx
 inst_Fx29_dispatcher::
     ret
 
-; 0xF-0A dispatcher
+; $F-0A dispatcher
 ;   Fx0A: LD Vx, K
 inst_Fx0A_dispatcher::
     ret
 
-; 0xF-1E dispatcher
+; $F-1E dispatcher
 ;   Fx1E: ADD I, Vx
 inst_Fx1E_dispatcher::
     ret
