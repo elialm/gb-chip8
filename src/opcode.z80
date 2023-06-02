@@ -5,6 +5,9 @@ section "Chip8 instruction implementation", rom0
 ;       true when the x register is specified at $-x-- or if
 ;       explicitly stated.
 
+; Note: the bc register contains the opcode being dispatched
+;       if not specified otherwise.
+
 ; $00E0 dispatcher
 ;   $00E0: CLS
 inst_00E0_dispatcher::
@@ -18,6 +21,16 @@ inst_00EE_dispatcher::
 ; $1--- dispatcher
 ;   $1nnn: JP addr
 inst_1xxx_dispatcher::
+    ; Calculate high byte
+    ld a, b
+    and a, $0F
+    or a, high(c8_rom) & $F0
+
+    ; Set program counter
+    ldh [c8_cpu_pc+1], a
+    ld a, c
+    ldh [c8_cpu_pc], a
+    
     ret
 
 ; $2--- dispatcher
