@@ -1,9 +1,5 @@
 include "hardware.inc"
 
-section "Chip8 Rom", romx, bank[$01], align[$0C, $200]
-c8_rom::
-incbin "roms/test_opcode.ch8"
-
 section "Initialisation", rom0[$0150]
 
 ; Initialisation
