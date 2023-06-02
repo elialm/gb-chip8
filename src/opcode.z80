@@ -74,16 +74,58 @@ inst_2xxx_dispatcher::
 ; $3--- dispatcher
 ;   $3xkk: SE Vx, byte
 inst_3xxx_dispatcher::
-    ret
+    ; Load and compare Vx register
+    ld a, [de]
+    cp a, c
+    ret nz
+
+    ; Skip next instruction
+    jr inst_skip_next
 
 ; $4--- dispatcher
 ;   $4xkk: SNE Vx, byte
 inst_4xxx_dispatcher::
-    ret
+    ; Load and compare Vx register
+    ld a, [de]
+    cp a, c
+    ret z
+
+    ; Skip next instruction
+    jr inst_skip_next
 
 ; $5--- dispatcher
 ;   $5xy0: SE Vx, Vy
 inst_5xxx_dispatcher::
+    ; Assert opcode lower byte is $-0
+    ld a, $0F
+    and a, c
+    jp nz, inst_fault_handler
+
+    ; Calculate Vy pointer
+    ld h, $FF           ; Chip8 registers sit in HRAM
+    ld l, c
+    swap l
+
+    ; Load and compare Vx and Vy
+    ld a, [de]
+    cp a, [hl]
+    ret nz
+
+    ; Skip next instruction
+    jr inst_skip_next
+
+inst_skip_next:
+    ; Increment program counter low byte twice
+    ldh a, [c8_cpu_pc]
+    add a, $02
+    ldh [c8_cpu_pc], a
+    ret nc
+
+    ; Increment program counter high byte (overflow)
+    ldh a, [c8_cpu_pc+1]
+    inc a
+    ldh [c8_cpu_pc+1], a
+
     ret
 
 ; $6--- dispatcher
