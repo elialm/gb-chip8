@@ -361,14 +361,43 @@ inst_ExA1_dispatcher::
 ;   bc = running opcode
 ;   de = pointer to used register for x
 
-; $F-33 dispatcher
-;   Fx33: LD B, Vx
-inst_Fx33_dispatcher::
+; $F-07 dispatcher
+;   Fx07: LD Vx, DT
+inst_Fx07_dispatcher::
+    ; Load Vx into DT
+    ld a, [de]
+    ld [c8_cpu_dt], a
+    
+    ret
+
+; $F-0A dispatcher
+;   Fx0A: LD Vx, K
+inst_Fx0A_dispatcher::
     ret
 
 ; $F-15 dispatcher
 ;   Fx15: LD DT, Vx
 inst_Fx15_dispatcher::
+    ret
+
+; $F-18 dispatcher
+;   Fx18: LD ST, Vx
+inst_Fx18_dispatcher::
+    ret
+
+; $F-1E dispatcher
+;   Fx1E: ADD I, Vx
+inst_Fx1E_dispatcher::
+    ret
+
+; $F-29 dispatcher
+;   Fx29: LD F, Vx
+inst_Fx29_dispatcher::
+    ret
+
+; $F-33 dispatcher
+;   Fx33: LD B, Vx
+inst_Fx33_dispatcher::
     ret
 
 ; $F-55 dispatcher
@@ -379,29 +408,4 @@ inst_Fx55_dispatcher::
 ; $F-65 dispatcher
 ;   Fx65: LD Vx, [I]
 inst_Fx65_dispatcher::
-    ret
-
-; $F-07 dispatcher
-;   Fx07: LD Vx, DT
-inst_Fx07_dispatcher::
-    ret
-
-; $F-18 dispatcher
-;   Fx18: LD ST, Vx
-inst_Fx18_dispatcher::
-    ret
-
-; $F-29 dispatcher
-;   Fx29: LD F, Vx
-inst_Fx29_dispatcher::
-    ret
-
-; $F-0A dispatcher
-;   Fx0A: LD Vx, K
-inst_Fx0A_dispatcher::
-    ret
-
-; $F-1E dispatcher
-;   Fx1E: ADD I, Vx
-inst_Fx1E_dispatcher::
     ret
