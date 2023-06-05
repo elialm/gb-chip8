@@ -367,7 +367,7 @@ inst_Fx07_dispatcher::
     ; Load Vx into DT
     ld a, [de]
     ld [c8_cpu_dt], a
-    
+
     ret
 
 ; $F-0A dispatcher
@@ -378,11 +378,19 @@ inst_Fx0A_dispatcher::
 ; $F-15 dispatcher
 ;   Fx15: LD DT, Vx
 inst_Fx15_dispatcher::
+    ; Load DT into Vx
+    ld a, [c8_cpu_dt]
+    ld [de], a
+
     ret
 
 ; $F-18 dispatcher
 ;   Fx18: LD ST, Vx
 inst_Fx18_dispatcher::
+    ; Load ST into Vx
+    ld a, [c8_cpu_st]
+    ld [de], a
+
     ret
 
 ; $F-1E dispatcher
