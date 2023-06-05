@@ -22,3 +22,37 @@ memset::
     dec d
     jp nz, memset
     ret
+
+; Initialise rand routine by seeding it with the value in register a
+rand_init::
+    ld [rand_state], a
+    ret
+
+; Load pseudo-random number in the a register
+; WARNING: the rand_init routine must be called once before calling this routine
+rand::
+    ld hl, rand_state
+    ld a, [hl]
+    ld b, [hl]
+    sla b
+    sla b
+    sla b
+    sla b
+    sla b
+    xor a, b
+    ld b, a
+    srl b
+    srl b
+    srl b
+    xor a, b
+    ld b, a
+    sla b
+    sla b
+    sla b
+    sla b
+    sla b
+    sla b
+    sla b
+    xor a, b
+    ld [hl], a
+    ret

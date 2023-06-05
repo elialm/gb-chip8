@@ -332,6 +332,13 @@ inst_Bxxx_dispatcher::
 ; $C--- dispatcher
 ;   $Cxkk: RND Vx, byte
 inst_Cxxx_dispatcher::
+    ; Generate random number and AND number with kk
+    call rand
+    and a, c
+
+    ; Load number to Vx
+    ld [de], a
+
     ret
 
 ; $D--- dispatcher

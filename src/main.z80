@@ -25,6 +25,10 @@ c8_init:
     ld a, high(c8_stack)
     ldh [c8_cpu_sp+1], a
 
+    ; Initialise RNG
+    ld a, $6E
+    call rand_init
+
     ; Loop Chip cycles
 .loop_cycle:
     call c8_cycle
