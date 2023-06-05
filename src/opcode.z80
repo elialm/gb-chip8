@@ -304,12 +304,30 @@ inst_9xxx_dispatcher::
 ; $A--- dispatcher
 ;   $Annn: LD I, addr
 inst_Axxx_dispatcher::
+    ; Load low byte to I
+    ld a, c
+    ld [c8_cpu_reg_i], a
+
+    ; Load high byte to I
+    ld a, $0F
+    and a, b
+    ld [c8_cpu_reg_i], a
+
     ret
 
 ; $B--- dispatcher
 ;   $Bnnn: JP V0, addr
 inst_Bxxx_dispatcher::
-    ret
+    ; Add V0 to bc register (ignore highest nibble)
+    ld a, [c8_cpu_reg_gp]   ; Load value of V0
+    add a, c
+    ld c, a
+    jr nc, .skip_high_inc
+    inc b
+.skip_high_inc:
+
+    ; The rest is same as the $1nnn routine, so just jump to that
+    jp inst_1xxx_dispatcher
 
 ; $C--- dispatcher
 ;   $Cxkk: RND Vx, byte
