@@ -420,18 +420,56 @@ inst_Fx29_dispatcher::
 ; $F-33 dispatcher
 ;   Fx33: LD B, Vx
 inst_Fx33_dispatcher::
-    ; Set hl to point to starting value in LUT
-    ld hl, c8_bcd_start_lut
+    ; Load Vx
+    ld b, $00
     ld a, [de]
+
+    ; Subtract 100 if a >= 100
+    cp a, 100
+    jr c, .skip_sub
+    sub a, 100
+    inc b
+
+    ; Subtract 100 again if a >= 100
+    cp a, 100
+    jr c, .skip_sub
+    sub a, 100
+    inc b
+.skip_sub:
+
+    ; Get I value as pointer
+    ld c, a
+    ldh a, [c8_cpu_reg_i]
+    ld e, a
+    ldh a, [c8_cpu_reg_i+1]
+    ld d, a
+
+    ; Store hundreds digit at I
+    ld a, b
+    ld [de], a
+    inc de
+
+    ; TODO: I register is not to be used as pointer yet as
+    ;       the program memory is still located in ROM. This
+    ;       is yet to be fixed.
+
+    ; Use remaining as offset to get lower byte
+    ld b, $00
+    ld hl, c8_bcd_start_lut
+    add hl, bc
+    ld c, hl
+
+    ; Get upper nibble and write it to I+1
+    ld a, c
     swap a
     and a, $0F
-    add a, l
-    ld l, a
+    ld [de], a
+    inc de
 
-    ; Load starting value
-    ld c, [hl]
-    inc hl
-    ld b, [hl]
+    ; Get lower nibble and write it to I+2
+    ld a, c
+    and a, $0F
+    ld [de], a
 
     ret
 
@@ -445,22 +483,40 @@ inst_Fx55_dispatcher::
 inst_Fx65_dispatcher::
     ret
 
-section "Chip8 BCD lookup table", rom0, align[$04]
+section "Chip8 BCD lookup table", rom0
 
 c8_bcd_start_lut:
-    dw $0000
-    dw $0016
-    dw $0032
-    dw $0048
-    dw $0064
-    dw $0080
-    dw $0096
-    dw $0112
-    dw $0128
-    dw $0144
-    dw $0160
-    dw $0176
-    dw $0192
-    dw $0208
-    dw $0224
-    dw $0240
+db $00,$01,$02,$03,$04,$05,$06,$07
+db $08,$09,$10,$11,$12,$13,$14,$15
+db $16,$17,$18,$19,$20,$21,$22,$23
+db $24,$25,$26,$27,$28,$29,$30,$31
+db $32,$33,$34,$35,$36,$37,$38,$39
+db $40,$41,$42,$43,$44,$45,$46,$47
+db $48,$49,$50,$51,$52,$53,$54,$55
+db $56,$57,$58,$59,$60,$61,$62,$63
+db $64,$65,$66,$67,$68,$69,$70,$71
+db $72,$73,$74,$75,$76,$77,$78,$79
+db $80,$81,$82,$83,$84,$85,$86,$87
+db $88,$89,$90,$91,$92,$93,$94,$95
+db $96,$97,$98,$99
+
+; ,$00,$01,$02,$03
+; db $04,$05,$06,$07,$08,$09,$10,$11
+; db $12,$13,$14,$15,$16,$17,$18,$19
+; db $20,$21,$22,$23,$24,$25,$26,$27
+; db $28,$29,$30,$31,$32,$33,$34,$35
+; db $36,$37,$38,$39,$40,$41,$42,$43
+; db $44,$45,$46,$47,$48,$49,$50,$51
+; db $52,$53,$54,$55,$56,$57,$58,$59
+; db $60,$61,$62,$63,$64,$65,$66,$67
+; db $68,$69,$70,$71,$72,$73,$74,$75
+; db $76,$77,$78,$79,$80,$81,$82,$83
+; db $84,$85,$86,$87,$88,$89,$90,$91
+; db $92,$93,$94,$95,$96,$97,$98,$99
+; db $00,$01,$02,$03,$04,$05,$06,$07
+; db $08,$09,$10,$11,$12,$13,$14,$15
+; db $16,$17,$18,$19,$20,$21,$22,$23
+; db $24,$25,$26,$27,$28,$29,$30,$31
+; db $32,$33,$34,$35,$36,$37,$38,$39
+; db $40,$41,$42,$43,$44,$45,$46,$47
+; db $48,$49,$50,$51,$52,$53,$54,$55
