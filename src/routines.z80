@@ -56,3 +56,8 @@ rand::
     xor a, b
     ld [hl], a
     ret
+
+section "Routines state", wram0
+
+rand_state:
+    ds 1

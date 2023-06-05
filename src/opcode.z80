@@ -420,6 +420,19 @@ inst_Fx29_dispatcher::
 ; $F-33 dispatcher
 ;   Fx33: LD B, Vx
 inst_Fx33_dispatcher::
+    ; Set hl to point to starting value in LUT
+    ld hl, c8_bcd_start_lut
+    ld a, [de]
+    swap a
+    and a, $0F
+    add a, l
+    ld l, a
+
+    ; Load starting value
+    ld c, [hl]
+    inc hl
+    ld b, [hl]
+
     ret
 
 ; $F-55 dispatcher
@@ -431,3 +444,23 @@ inst_Fx55_dispatcher::
 ;   Fx65: LD Vx, [I]
 inst_Fx65_dispatcher::
     ret
+
+section "Chip8 BCD lookup table", rom0, align[$04]
+
+c8_bcd_start_lut:
+    dw $0000
+    dw $0016
+    dw $0032
+    dw $0048
+    dw $0064
+    dw $0080
+    dw $0096
+    dw $0112
+    dw $0128
+    dw $0144
+    dw $0160
+    dw $0176
+    dw $0192
+    dw $0208
+    dw $0224
+    dw $0240
