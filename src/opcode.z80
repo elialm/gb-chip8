@@ -396,6 +396,20 @@ inst_Fx18_dispatcher::
 ; $F-1E dispatcher
 ;   Fx1E: ADD I, Vx
 inst_Fx1E_dispatcher::
+    ; Add Vx and lower byte of I
+    ld a, [de]
+    ld h, a
+    ld a, [c8_cpu_reg_i]
+    add a, h
+    ld [c8_cpu_reg_i], a
+
+    ; Increment high byte of I if carry
+    jr nc, .skip_high_increment
+    ld a, [c8_cpu_reg_i+1]
+    inc a
+    ld [c8_cpu_reg_i+1], a
+.skip_high_increment:
+
     ret
 
 ; $F-29 dispatcher
