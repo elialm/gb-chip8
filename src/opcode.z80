@@ -40,7 +40,7 @@ inst_1xxx_dispatcher::
     ; Calculate high address byte
     ld a, b
     and a, $0F
-    or a, high(c8_rom) & $F0
+    or a, high(c8_mem) & $F0
 
     ; Set program counter
     ldh [c8_cpu_pc+1], a

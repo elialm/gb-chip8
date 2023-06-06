@@ -24,9 +24,10 @@ memcpy_wd::
     dec de              ; Decrement counter
 	
     ; Compare de to 0
-    and a, e
+    xor a, a
+    cp a, e
     jr nz, memcpy_wd    ; Keep copying if != 0
-    and a, d
+    cp a, d
     jr nz, memcpy_wd    ; Keep copying if != 0
 
     ret
