@@ -477,11 +477,33 @@ inst_Fx33_dispatcher::
 ; $F-55 dispatcher
 ;   Fx55: LD [I], Vx
 inst_Fx55_dispatcher::
+    ; Get I value as pointer
+    ldh a, [c8_cpu_reg_i]
+    ld l, a
+    ldh a, [c8_cpu_reg_i+1]
+    ld h, a
+
+    ; Call memcpy
+    ld bc, c8_cpu_reg_gp    ; V0 pointer
+    ld d, e                 ; counter
+    call memcpy
+
     ret
 
 ; $F-65 dispatcher
 ;   Fx65: LD Vx, [I]
 inst_Fx65_dispatcher::
+    ; Get I value as pointer
+    ldh a, [c8_cpu_reg_i]
+    ld c, a
+    ldh a, [c8_cpu_reg_i+1]
+    ld b, a
+
+    ; Call memcpy
+    ld hl, c8_cpu_reg_gp    ; V0 pointer
+    ld d, e                 ; counter
+    call memcpy
+
     ret
 
 section "Chip8 BCD lookup table", rom0
