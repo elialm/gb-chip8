@@ -311,7 +311,8 @@ inst_Axxx_dispatcher::
     ; Load high byte to I
     ld a, $0F
     and a, b
-    ld [c8_cpu_reg_i], a
+    or a, high(c8_mem)      ; Set high nibble to point to within WRAM1
+    ld [c8_cpu_reg_i+1], a
 
     ret
 
@@ -407,6 +408,8 @@ inst_Fx1E_dispatcher::
     jr nc, .skip_high_increment
     ld a, [c8_cpu_reg_i+1]
     inc a
+    and a, $0F
+    or a, high(c8_mem)      ; Set high nibble to point to within WRAM1
     ld [c8_cpu_reg_i+1], a
 .skip_high_increment:
 
@@ -443,6 +446,8 @@ inst_Fx33_dispatcher::
     ld e, a
     ldh a, [c8_cpu_reg_i+1]
     ld d, a
+
+    ; TODO: what happens if I sits at the end of memory? (e.g. I = $FFF)
 
     ; Store hundreds digit at I
     ld a, b
