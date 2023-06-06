@@ -449,15 +449,11 @@ inst_Fx33_dispatcher::
     ld [de], a
     inc de
 
-    ; TODO: I register is not to be used as pointer yet as
-    ;       the program memory is still located in ROM. This
-    ;       is yet to be fixed.
-
     ; Use remaining as offset to get lower byte
     ld b, $00
     ld hl, c8_bcd_start_lut
     add hl, bc
-    ld c, hl
+    ld c, [hl]
 
     ; Get upper nibble and write it to I+1
     ld a, c

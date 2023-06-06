@@ -1,3 +1,20 @@
-section "Chip8 Rom - test_opcode", romx, bank[$01], align[$0C, $200]
+section "Chip8 Rom - test_opcode", romx, bank[$01], align[$0C]
 c8_rom::
 incbin "roms/test_opcode.ch8"
+.rom_end
+
+; Output error if ROM size is too big
+C8_ROM_SIZE = c8_rom.rom_end - c8_rom
+if C8_ROM_SIZE > $E00
+    fail "ROM size of " C8_ROM_SIZE " exeeds the $E00 maximum"
+endc
+
+; Routine for copying Chip8 ROM to WRAM 
+c8_copy_rom::
+    ; Copy ROM
+    ld de, C8_ROM_SIZE
+    ld bc, c8_rom
+    ld hl, $D200        ; Start of WRAM1 + $200 offset (start of Chip8 ROM)
+    call memcpy_wd
+
+    ret

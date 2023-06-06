@@ -10,7 +10,25 @@ memcpy::
     inc bc              ; Increment src pointer
     dec d               ; Decrement counter
 
-    jp nz, memcpy       ; Keep copying if != 0
+    jr nz, memcpy       ; Keep copying if != 0
+    ret
+
+; Memory copy - copies n bytes (16 bit) from src to dest, incrementing pointer
+;   n    - [de] registers (n != 0)
+;   src  - [bc] registers
+;   dest - [hl] registers
+memcpy_wd::
+    ld a, [bc]          ; Load from src
+    ld [hl+], a         ; Copy to dest and increment pointer
+    inc bc              ; Increment src pointer
+    dec de              ; Decrement counter
+	
+    ; Compare de to 0
+    and a, e
+    jr nz, memcpy_wd    ; Keep copying if != 0
+    and a, d
+    jr nz, memcpy_wd    ; Keep copying if != 0
+
     ret
 
 ; Memory set - sets n bytes (8 bit) at dest to x, incrementing pointer
@@ -20,7 +38,7 @@ memcpy::
 memset::
     ld [hl+], a
     dec d
-    jp nz, memset
+    jr nz, memset
     ret
 
 ; Initialise rand routine by seeding it with the value in register a

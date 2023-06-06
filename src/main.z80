@@ -9,6 +9,9 @@ __main::
 
 ; Initialise the emulator
 c8_init:
+    ; Copy ROM to WRAM
+    call c8_copy_rom
+
     ; Zero all cpu variables
     ld d, 25
     ld hl, c8_cpu_reg_gp
@@ -17,13 +20,17 @@ c8_init:
 
     ; Initialise program counter
     ; Low byte is already $00
-    ld a, high(c8_rom)      ; Chip8 programs usually start at $200
+    ld a, high(c8_mem) | $02        ; Chip8 programs usually start at $200
     ldh [c8_cpu_pc+1], a
 
     ; Initialise stack pointer
     ; Low byte is already $00
     ld a, high(c8_stack)
     ldh [c8_cpu_sp+1], a
+
+    ; Initialise I register high nibble to always point to Chip8 memory
+    ld a, high(c8_mem)
+    ldh [c8_cpu_reg_i+1], a
 
     ; Initialise RNG
     ld a, $6E
@@ -291,7 +298,7 @@ section "Chip8 state", hram
 ; General purpose registers (16 x 8-bit)
 c8_cpu_reg_gp::
     ds 16
-; General purpose registers (1 x 16-bit)
+; General purpose register (1 x 12-bit)
 c8_cpu_reg_i::
     ds 2
 ; CPU flag register
@@ -315,3 +322,9 @@ section "Chip8 stack", wram0, align[$08]
 ; Chip8 stack
 c8_stack::
     ds 32
+
+section "Chip8 memory", wramx[$D000], bank[$01]
+
+; Chip8 memory map
+c8_mem::
+    ds $1000
