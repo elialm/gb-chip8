@@ -1,16 +1,66 @@
+include "hardware.inc"
+
+; Get adress of cell on virtual screen 0 and load pointer into [hl]
+;	x - x coordinate
+;	y - y coordinate
+LOAD_CELL_SCRN0_HL: macro
+	ld hl, _SCRN0 + SCRN_VX_B * \2 + \1
+endm
+
+; Wait for V-Blank and then disable the LCD
+; Executes halt and waits for V-blank interrupt
+LCD_DISABLE_IRQ: macro
+	halt
+    nop
+    ld hl, rLCDC
+    res 7, [hl]
+endm
+
+; Wait for V-Blank and then disable the LCD
+; Loops checking the mode bits in the STAT register
+LCD_DISABLE_LOOP: macro
+	ld hl, rSTAT
+    ld b, $03
+    ld c, $01
+.loop\@:
+    ld a, [hl]
+    and a, b
+    cp a, c
+    jr nz, .loop\@
+    ld hl, rLCDC
+    res 7, [hl]
+endm
+
+; Wait for V-Blank
+LCD_AWAIT_VBLANK: macro
+	halt
+    nop
+endm
+
+; Enable the LCD
+LCD_ENABLE: macro
+	ld hl, rLCDC
+    set 7, [hl]
+endm
+
 section "Chip8 display routines", rom0
 
-C8_SPRITE_START = c8_mem
+c8_display_init::
+    ; Zero screen buffer
+    xor a, a
+    ld d, 32
+    ld hl, c8_screen_buffer
+    call memset
 
-; Copy sprite data to Chip8 memory
-c8_copy_sprites::
-    ; Initialise loop
+    ; Copy sprite data to Chip8 memory
+    
+    ; Initialise copy loop
     ld e, 16    ; Copy 16 sprites (1 mapped to each nibble value)
 
     ; Call memcpy to copy one sprite
 .sprite_loop:
     ld d, 5
-    ld hl, C8_SPRITE_START
+    ld hl, c8_mem           ; Start sprites at Chip8 address $000
     ld bc, c8_char_sprites
     call memcpy
 
@@ -23,11 +73,55 @@ c8_copy_sprites::
     ; Check loop condition
     dec e
     jr nz, .sprite_loop
+
+    ; Perform Gameboy LCD initialisation
+
+    ; Disable LCD
+    LCD_DISABLE_LOOP
+
+    ; Zero tile data
+    xor a, a
+    ld d, a         ; Clears 16 tiles (16 tiles * 16 = 256 bytes)
+    ld hl, _VRAM    ; Points to tile map
+    call memset
+    ld d, 10 * 16   ; Clears remaining 10 tiles
+    call memset
+
+    ; Set tile ID $00 to be a black tile (for screen outline)
+    cpl                         ; ~a = $FF
+    ld d, 16
+    ld hl, _VRAM
+    call memset
+
+    ; Initialise window loop for Chip8 display
+    ld a, $80               ; Start at tile ID $80
+    ld e, 8                 ; Initialise 8 rows
+    ld bc, $0010            ; Offset for end of row to start of next
+    LOAD_CELL_SCRN0_HL 2,5
+
+    ; Set each tile to incrementing ID numbers
+.row_loop:
+    ld d, 16                ; Initialise 16 columns
+.column_loop:
+    ld [hl+], a
+    inc a
+    dec d
+    jr nz, .column_loop
+    
+    add hl, bc
+    dec e
+    jr nz, .row_loop
+
+    ; Re-enable the LCD
+    LCD_ENABLE
+
     ret
 
 ; Routine will update the Gameboy's display with the internal screen buffer
 ; Note that this is a routine called by the V-blank IRQ and shall not be called by other code.
-c8_update_display::
+c8_display_update::
+
+
     reti
 
 ; Table used to translate Chip8 sprites to Gameboy tile data
@@ -59,7 +153,7 @@ c8_char_sprites::
 
 section "Chip8 display buffer", wram0
 
-; The screen buffer is organised as a 8x4 (WxH) byte double array
+; The screen buffer is organised as a 8x4 (WxH) byte matrix
 ; Each row is 8 bytes (64 bits) long
 ; Each column is 4 bytes (32 bits) high
 

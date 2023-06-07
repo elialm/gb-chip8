@@ -21,14 +21,6 @@ c8_init:
     xor a, a
     call memset
 
-    ; Zero screen buffer
-    ld d, 32
-    ld hl, c8_screen_buffer
-    call memset
-
-    ; Copy character sprites to Chip8 memory
-    call c8_copy_sprites
-
     ; Initialise program counter
     ; Low byte is already $00
     ld a, high(c8_mem) | $02        ; Chip8 programs usually start at $200
@@ -46,6 +38,9 @@ c8_init:
     ; Initialise RNG
     ld a, $6E
     call rand_init
+
+    ; Initialise the Chip8 display
+    call c8_display_init
 
     ; Enable VBL (and global) interrupt
     ld a, $01

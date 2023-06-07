@@ -34,7 +34,7 @@ __rst_38:
 
 section "V-Blank IRQ Vector",rom0[$0040]
 __vbl_vect:
-    jp c8_update_display
+    jp c8_display_update
 
 section "LCD IRQ Vector",rom0[$0048]
 __lcd_vect:
