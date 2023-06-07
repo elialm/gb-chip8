@@ -9,6 +9,9 @@ __main::
 
 ; Initialise the emulator
 c8_init:
+    ; Disable interupts
+    di
+
     ; Copy ROM to WRAM
     call c8_copy_rom
 
@@ -17,6 +20,14 @@ c8_init:
     ld hl, c8_cpu_reg_gp
     xor a, a
     call memset
+
+    ; Zero screen buffer
+    ld d, 32
+    ld hl, c8_screen_buffer
+    call memset
+
+    ; Copy character sprites to Chip8 memory
+    call c8_copy_sprites
 
     ; Initialise program counter
     ; Low byte is already $00
@@ -35,6 +46,11 @@ c8_init:
     ; Initialise RNG
     ld a, $6E
     call rand_init
+
+    ; Enable VBL (and global) interrupt
+    ld a, $01
+    ld [rIE], a
+    ei
 
     ; Loop Chip cycles
 .loop_cycle:
