@@ -1,0 +1,28 @@
+c8	64x32
+x2	128x64
+
+gb 160x144 (20x18 tiles)
+
+cutoff 4 upper&lower rows:
+gb 160x80 (20x10 tiles)
+
+cuttoff 5 upper&lower rows + cuttoff 2 left&right columns:
+gb 128x64 (16x8 tiles)
+	(every c8 pixel maps to a 2x2 group of gb pixels)
+
+0	00
+1	03
+2	0c
+3	0f
+4	30
+5	33
+6	3c
+7	3f
+8	c0
+9	c3
+a	cc
+b	cf
+c	f0
+d	f3
+e	fc
+f	ff
