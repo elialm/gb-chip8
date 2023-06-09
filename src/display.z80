@@ -127,12 +127,15 @@ c8_display_update::
     push hl
 
     ; Initialise window loop
-    ld e, 32                ; Row counter
+    ld a, 8
+    ld [c8_dvar_row_counter], a
     ld bc, c8_screen_buffer
     ld hl, $8800            ; Start of tile data
 
 .row_loop:
-    ld d, 8
+    ld e, 4     ; Tile counter
+.tile_loop:
+    ld d, 8     ; Column counter
 .column_loop:
     ; Push loop counters on stack to free up registers
     push de
@@ -178,17 +181,26 @@ c8_display_update::
     dec d
     jr nz, .column_loop
 
-    ; Check row loop progress
-    dec e
-    jr z, .return
-
-    ; Set hl to point to start of next pixel row
-    ld a, 4         ; hl points to first pixel, offset by 4 to point to next line
+    ; Offset hl to point to next pixel row in tile
+    ld a, $04
     add a, l
     ld l, a
+
+    ; Check tile loop progress
+    dec e
+    jr nz, .tile_loop
+
+    ; Set hl to point to start of next tile row
+    xor a, a
+    ld l, a
+    inc h
+
+    ; Check row loop progress
+    ld a, [c8_dvar_row_counter]
+    dec a
+    ld [c8_dvar_row_counter], a
     jr .row_loop
 
-.return
     ; Pop registers from stack
     pop hl
     pop de
@@ -235,3 +247,8 @@ section "Chip8 display buffer", wram0, align[$08]
 c8_screen_buffer::
     ds 8 * 32
 .end
+
+section "Chip8 display variables", hram
+
+c8_dvar_row_counter:
+    ds 1
