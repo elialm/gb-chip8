@@ -199,7 +199,7 @@ c8_display_update::
     ld a, [c8_dvar_row_counter]
     dec a
     ld [c8_dvar_row_counter], a
-    jr .row_loop
+    jr nz, .row_loop
 
     ; Pop registers from stack
     pop hl

@@ -47,10 +47,16 @@ c8_init:
     ld [rIE], a
     ei
 
-    ; Loop Chip cycles
+    ; Loop halt (for display testing)
 .loop_cycle:
-    call c8_cycle
+    halt
+    nop
     jr .loop_cycle
+
+;     ; Loop Chip cycles
+; .loop_cycle:
+;     call c8_cycle
+;     jr .loop_cycle
 
 ; Run a Chip8 cycle
 ; This includes:
