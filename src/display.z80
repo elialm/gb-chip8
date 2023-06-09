@@ -46,16 +46,6 @@ endm
 section "Chip8 display routines", rom0
 
 c8_display_init::
-    ; Zero screen buffer
-    ; xor a, a
-    ld a, $FF
-    ld d, a                 ; Copies 256 bytes
-    ld hl, c8_screen_buffer
-    call memset
-    call memset
-    call memset
-    call memset
-
     ; Copy sprite data to Chip8 memory
     
     ; Initialise copy loop
@@ -91,82 +81,83 @@ c8_display_init::
     ld d, 10 * 16   ; Clears remaining 10 tiles
     call memset
 
-    ; Set tile ID $00 to be a black tile (for screen outline)
-    cpl                         ; ~a = $FF
-    ld d, 16
-    ld hl, _VRAM
-    call memset
+    ; Generate tile data
+    ld d, $01
+    ld hl, $8010
 
-    ; Initialise window loop for Chip8 display
-    ld a, $80               ; Start at tile ID $80
-    ld e, 8                 ; Initialise 8 rows
-    ld bc, $0010            ; Offset for end of row to start of next
-    LOAD_CELL_SCRN0_HL 2,5
+.tile_gen_loop:
+    ; Set high byte of translation table pointer
+    ld b, high(c8_sprite_translation_table)
 
-    ; Set each tile to incrementing ID numbers
-.row_loop:
-    ld d, 16                ; Initialise 16 columns
-.column_loop:
+    ; Load a with translated tile from lower nibble
+    ld a, d
+    ld c, low(c8_sprite_translation_table)
+    and a, $0F
+    or a, c
+    ld c, a
+    ld a, [bc]
+
+    ; Load translated tile to top pixel row
     ld [hl+], a
-    inc a
-    dec d
-    jr nz, .column_loop
-    
+    inc hl
+    ld [hl+], a
+    inc hl
+
+    ; Load a with translated tile from upper nibble
+    ld a, d
+    ld c, low(c8_sprite_translation_table)
+    swap a
+    and a, $0F
+    or a, c
+    ld c, a
+    ld a, [bc]
+
+    ; Load translated tile to 2nd pixel row
+    ld [hl+], a
+    inc hl
+    ld [hl+], a
+    inc hl
+
+    ; Offset hl to point to next tile
+    ld bc, $0008
     add hl, bc
-    dec e
-    jr nz, .row_loop
+
+    ; Check loop condition
+    inc d
+    jr nz, .tile_gen_loop
+
+    ; Copy tiles $00-$7F in $8000 to $9000
+    ld bc, $8000
+    call c8_display_copy_tiles
+    call c8_display_copy_tiles
+    call c8_display_copy_tiles
+    call c8_display_copy_tiles
 
     ; Re-enable the LCD
     LCD_ENABLE
 
     ret
 
-; Routine will update the Gameboy's display with the internal screen buffer
-; Note that this is a routine called by the V-blank IRQ and shall not be called by other code.
-c8_display_update::
-    ; Push registers to stack
-    push af
-    push bc
-    push de
-    push hl
-
-    ; Initialise copy loop
+; Copy tile map in $8000 to $9000
+;   hl - dest address ($9000, $9200, $9400, $9600)
+;   hl - src address ($8000, $8200, $8400, $8600)
+c8_display_copy_tiles:
+    ; Initialise loop counter
     ld d, $00
-    ld bc, c8_screen_buffer
-    ld hl, $8800
+
+    ; Copy 1 byte and skip 2nd color ID byte
 .copy_loop:
-    ; Copy 4 bytes each iteration
     ld a, [bc]
     ld [hl+], a
     inc bc
-    inc hl
-
-    ld a, [bc]
-    ld [hl+], a
     inc bc
     inc hl
 
-    ld a, [bc]
-    ld [hl+], a
-    inc bc
-    inc hl
-
-    ld a, [bc]
-    ld [hl+], a
-    inc bc
-    inc hl
-
-    ; Check loop progress
+    ; Check loop condition
     dec d
     jr nz, .copy_loop
 
-    ; Pop registers from stack
-    pop hl
-    pop de
-    pop bc
-    pop af
-
-    reti
+    ret
 
 ; Character sprites which are copied to Chip8 memory during initialisation.
 ; Each character is made from 8x5 bytes
@@ -196,15 +187,3 @@ c8_sprite_translation_table:
     db $30,$33,$3C,$3F
     db $C0,$C3,$CC,$CF
     db $F0,$F3,$FC,$FF
-
-section "Chip8 display buffer", wram0, align[$08]
-
-; Chip8 screen buffer
-c8_screen_buffer::
-    ds 1024
-.end
-
-section "Chip8 display variables", hram
-
-c8_dvar_row_counter:
-    ds 1
