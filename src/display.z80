@@ -47,9 +47,13 @@ section "Chip8 display routines", rom0
 
 c8_display_init::
     ; Zero screen buffer
-    xor a, a
+    ; xor a, a
+    ld a, $FF
     ld d, a                 ; Copies 256 bytes
     ld hl, c8_screen_buffer
+    call memset
+    call memset
+    call memset
     call memset
 
     ; Copy sprite data to Chip8 memory
@@ -126,80 +130,35 @@ c8_display_update::
     push de
     push hl
 
-    ; Initialise window loop
-    ld a, 8
-    ld [c8_dvar_row_counter], a
+    ; Initialise copy loop
+    ld d, $00
     ld bc, c8_screen_buffer
-    ld hl, $8800            ; Start of tile data
-
-.row_loop:
-    ld e, 4     ; Tile counter
-.tile_loop:
-    ld d, 8     ; Column counter
-.column_loop:
-    ; Push loop counters on stack to free up registers
-    push de
-    
-    ; Get translated sprite of high nibble
+    ld hl, $8800
+.copy_loop:
+    ; Copy 4 bytes each iteration
     ld a, [bc]
-    swap a
-    and a, $0F
-    ld de, c8_sprite_translation_table
-    add a, e
-    ld e, a
-    ld a, [de]
-
-    ; Write sprite to VRAM and set hl to point to next 4 pixels
     ld [hl+], a
-    inc hl
-    ld [hl], a
-    ld a, 14
-    add a, l
-    ld l, a
-
-    ; Get translated sprite of low nibble
-    ld a, [bc]
-    and a, $0F
-    ld de, c8_sprite_translation_table
-    add a, e
-    ld e, a
-    ld a, [de]
-
-    ; Write sprite to VRAM and set hl to point to next 4 pixels
-    ld [hl+], a
-    inc hl
-    ld [hl], a
-    ld a, 14
-    add a, l
-    ld l, a
-
-    ; Update screen buffer pointer
     inc bc
+    inc hl
 
-    ; Check column loop progress
-    pop de
+    ld a, [bc]
+    ld [hl+], a
+    inc bc
+    inc hl
+
+    ld a, [bc]
+    ld [hl+], a
+    inc bc
+    inc hl
+
+    ld a, [bc]
+    ld [hl+], a
+    inc bc
+    inc hl
+
+    ; Check loop progress
     dec d
-    jr nz, .column_loop
-
-    ; Offset hl to point to next pixel row in tile
-    ld a, $04
-    add a, l
-    ld l, a
-
-    ; Check tile loop progress
-    dec e
-    jr nz, .tile_loop
-
-    ; Set hl to point to start of next tile row
-    xor a, a
-    ld l, a
-    inc h
-
-    ; Check row loop progress
-    ld a, [c8_dvar_row_counter]
-    dec a
-    ld [c8_dvar_row_counter], a
-    jr nz, .row_loop
+    jr nz, .copy_loop
 
     ; Pop registers from stack
     pop hl
@@ -240,12 +199,9 @@ c8_sprite_translation_table:
 
 section "Chip8 display buffer", wram0, align[$08]
 
-; The screen buffer is organised as a 32x8 (HxW) byte matrix
-; Each row is 8 bytes (64 bits) long
-
 ; Chip8 screen buffer
 c8_screen_buffer::
-    ds 8 * 32
+    ds 1024
 .end
 
 section "Chip8 display variables", hram
