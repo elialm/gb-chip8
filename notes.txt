@@ -26,3 +26,8 @@ c	f0
 d	f3
 e	fc
 f	ff
+
+Attempting to make a screen routine based on tiles
+Each tile only has the 2 rows of 4 pixels, but BG0 and BG1 will be interleaved
+BG1 will be shifted down 2 rows and each 2 rows drawn will trigger a BG flip
+Seems a pain to implement, but it just might work
