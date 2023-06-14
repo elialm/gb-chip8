@@ -25,7 +25,7 @@ def to_bcd(val: int):
     if x & 0xF0 > 0x90:
         x += 0x60
 
-    return x
+    return x & 0xFF
 
 for n in range(256):
-    print('db $%02X' % (to_bcd(n) & 0xFF))
+    print('db $%02X' % to_bcd(n))
